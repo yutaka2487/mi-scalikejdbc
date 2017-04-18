@@ -8,7 +8,9 @@ object Sample extends App {
   ConnectionPool.singleton(url, user, password)
 
   val names = DB readOnly { implicit session =>
-    sql"select application_name from pg_stat_activity".map(_.string("application_name")).list.apply()
+    sql"select usename, application_name, query from pg_stat_activity".map {
+      rs => (rs.string(1), rs.string(2), rs.string(3).replaceAll("\\s+", " "))
+    }.list.apply()
   }
   names.foreach(println)
 }
